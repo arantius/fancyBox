@@ -483,7 +483,7 @@
 					direction = current.direction.next;
 				}
 
-				F.jumpto(current.index + 1, direction, 'next');
+				F.jumpto(1, direction, 'next');
 			}
 		},
 
@@ -496,35 +496,50 @@
 					direction = current.direction.prev;
 				}
 
-				F.jumpto(current.index - 1, direction, 'prev');
+				F.jumpto(-1, direction, 'prev');
 			}
 		},
 
 		// Navigate to gallery item by index
-		jumpto: function ( index, direction, router ) {
+		jumpto: function ( moveby, direction, router ) {
 			var current = F.current;
 
 			if (!current) {
 				return;
 			}
 
-			index = getScalar(index);
-
 			F.direction = direction || current.direction[ (index >= current.index ? 'next' : 'prev') ];
 			F.router    = router || 'jumpto';
 
-			if (current.loop) {
-				if (index < 0) {
-					index = current.group.length + (index % current.group.length);
+			var index = getScalar(current.index);
+			var nextIndex = index;
+
+			while (true) {
+				nextIndex += moveby;
+				if (current.loop) {
+					if (nextIndex < 0) {
+						nextIndex = current.group.length + (nextIndex % current.group.length);
+					}
+					nextIndex = nextIndex % current.group.length;
 				}
 
-				index = index % current.group.length;
-			}
+				if (index == nextIndex) {
+					// We've looped all the way around, give up.
+					break;
+				}
 
-			if (current.group[ index ] !== undefined) {
-				F.cancel();
+				var next = current.group[nextIndex];
+				if (next.href == current.href) {
+					// This "next" points to the same thing as current, skip.
+					continue;
+				}
 
-				F._start(index);
+				if (current.group[ nextIndex ] !== undefined) {
+					F.cancel();
+					F._start(nextIndex);
+				}
+
+				break;
 			}
 		},
 

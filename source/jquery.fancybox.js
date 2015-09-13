@@ -509,7 +509,7 @@
 			}
 
 			F.direction = direction || current.direction[ (index >= current.index ? 'next' : 'prev') ];
-			F.router		= router || 'jumpto';
+			F.router    = router || 'jumpto';
 
 			var index = getScalar(current.index);
 			var nextIndex = index;
